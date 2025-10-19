@@ -1,6 +1,6 @@
 import { Collection, Db } from "npm:mongodb";
-import { Empty, ID } from "@utils/types.ts";
-import { freshID } from "@utils/database.ts";
+import { Empty, ID } from "@utils/types";
+import { freshID } from "@utils/database";
 
 // Collection prefix to ensure namespace separation
 const PREFIX = "LikertSurvey" + ".";
