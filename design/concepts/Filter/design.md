@@ -1,0 +1,1 @@
+Realized that I was thinking of Filter more as a utility layer in my API. As I kept prompting and tweaking code, I realized this and decided not to use this as a concept.

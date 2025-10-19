@@ -1,0 +1,1 @@
+One of two new concepts created in place of the BetaVideo concept. Ran into some syntax + type errors while prompting. Providing the output/stack trace from running tests or encountering any errors helped the LLM to figure out the issue much quicker instead of potentially hallucinating a fix.

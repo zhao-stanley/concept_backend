@@ -1,15 +1,14 @@
-Interesting Things
+## Interesting Moments:
 
 - Sometimes the LLM just assumes something exists, such as a type.
+- The LLM seems to struggle sometimes with imports and locating files properly
+- [response.9921f2f1](../../context/design/concepts/Video/testing.md/steps/response.9921f2f1.md) Details get hallucinated such as video links. When generating test cases to handle videos, it generates Youtube URLs that seem potentially real but don't actually exist.
+- It's quite obvious the variation/difference in response from generating each concept. Some generations are concise and focus on generating solely the code, whereas other generations have more explanation from the LLM.
+- [response.13e4ba6c](../../context/design/concepts/Tagging/testing.md/steps/response.13e4ba6c.md) LLM is also susceptible to very small syntax errors that might affect the entire generation. Can definitely see how this might increase costs if you needed multiple gens to fix a small issue.
 
-- The LLM seems to struggle sometimes with imports and locating files properly'
+Using the feedback from the previous assignments about my concepts, I split the BetaVideo concept down to two generic concepts. I removed the BoardView concept because it's not so much a concept as much as it is UI rendering logic, as well as the Filter concept, because I think it serves more as a utility layer in the API as opposed to a concept with states. I have kept the Filter concepts and generated responses to show the process.
 
-- Niche details about certain tech/libraries are overlooked, such as Deno handling extensions automatically from import alias. This caused an issue for me earlier.
-
-
-Using the feedback from the previous assignments about my concepts, I split the BetaVideo concept down to two generic concepts. I also removed the BoardView concept because it's not so much a concept as much as it is UI rendering logic.
-
-Refactored concepts:
+## Refactored concepts:
 
 ## Problem [Board, User]
 
@@ -48,49 +47,6 @@ actions
     getProblemsByGrade(grade: String): (problems: set of Problems)
         effect:
             return all problems matching the specified grade
-```
-
-## Filter [Item]
-
-```
-concept Filter [Item]
-
-purpose
-    enable advanced search through collections of items based on multiple criteria
-
-principle
-    after adding search criteria to a filter, applying it to a collection
-    returns only items matching all specified criteria
-
-state
-    a set of Filters with
-        a filterId String
-        a criteria mapping from String to set of Strings  // key-value search criteria
-
-actions
-    createFilter(): (filter: Filter)
-        effect:
-            generate unique filterId
-            create filter with empty criteria
-            return the created filter
-
-    addCriteria(filter: Filter, key: String, values: set of Strings)
-        requires:
-            filter exists
-        effect:
-            add or update criteria[key] = values in filter
-
-    search(filter: Filter, items: set of Items): (results: set of Items)
-        requires:
-            filter exists
-        effect:
-            return items that match all criteria in filter
-
-    clearFilter(filter: Filter)
-        requires:
-            filter exists
-        effect:
-            remove all criteria from filter
 ```
 
 ## Video

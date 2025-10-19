@@ -1,1 +1,0 @@
-![@concept.50ec1b22](../../../context/design/concepts/Video/implementation.md/steps/concept.50ec1b22.md)
