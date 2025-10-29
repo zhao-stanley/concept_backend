@@ -1,0 +1,3 @@
+Removed Board/user from Problem concept, as I'll be mocking up data (too complicated to implement), and they serve purposes that are not necessarily a fullblown concept. Also updated the problem concept properties to better represent the coordinate system I'm using for the holds and to also support different board angles.
+
+I'm also working on implementing an API layer that uses the generic concepts to interact with the backend.
