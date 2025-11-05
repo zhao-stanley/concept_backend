@@ -184,13 +184,14 @@ export default class ProblemConcept {
   }
 
   /**
-   * searchProblems(gradeMin?: String, gradeMax?: String, boardType?: String, angle?: Number, setterName?: String, holds?: set of Strings): (problems: set of Problems)
+   * searchProblems(gradeMin?: String, gradeMax?: String, boardType?: String, angle?: Number, setterName?: String, holds?: set of Strings, feet?: set of Strings): (problems: set of Problems)
    *
    * **requires**
    *   - At least one search parameter must be provided.
    *   - If `gradeMin` or `gradeMax` are provided, they must follow the format "vN" where N is 0-17.
    *   - If `angle` is provided, it must be between 0 and 70.
    *   - If `holds` are provided, they must be an array of hold coordinates.
+   *   - If `feet` are provided, they must be an array of foot hold coordinates.
    *
    * **effects**
    *   - Returns an object containing an array of all `ProblemDocument`s matching the search criteria.
@@ -199,6 +200,7 @@ export default class ProblemConcept {
    *   - Filters by `angle` if provided (exact match).
    *   - Filters by `setterName` if provided (case-insensitive partial match).
    *   - Filters by `holds` if provided (problems must contain all specified holds).
+   *   - Filters by `feet` if provided (problems must contain all specified foot holds).
    *   - If no search parameters are provided, returns an error object.
    *   - If no problems match the criteria, returns an empty array.
    */
@@ -210,6 +212,7 @@ export default class ProblemConcept {
       angle,
       setterName,
       holds,
+      feet,
     }: {
       gradeMin?: string;
       gradeMax?: string;
@@ -217,16 +220,33 @@ export default class ProblemConcept {
       angle?: number;
       setterName?: string;
       holds?: string[];
+      feet?: string[];
     },
   ): Promise<{ problems: ProblemDocument[] } | { error: string }> {
-    console.log(
-      `Action: searchProblems with gradeMin: '${gradeMin}', gradeMax: '${gradeMax}', boardType: '${boardType}', angle: ${angle}, setterName: '${setterName}', holds: '${holds?.join(",")}'`,
-    );
+    console.log("\n=== searchProblems DEBUG START ===");
+    console.log("Raw parameters received:");
+    console.log(`  gradeMin: ${gradeMin} (${typeof gradeMin})`);
+    console.log(`  gradeMax: ${gradeMax} (${typeof gradeMax})`);
+    console.log(`  boardType: ${boardType} (${typeof boardType})`);
+    console.log(`  angle: ${angle} (${typeof angle})`);
+    console.log(`  setterName: ${setterName} (${typeof setterName})`);
+    console.log(`  holds:`, holds, `(type: ${typeof holds}, isArray: ${Array.isArray(holds)})`);
+    console.log(`  feet:`, feet, `(type: ${typeof feet}, isArray: ${Array.isArray(feet)})`);
 
     // --- Requires validation ---
-    if (!gradeMin && !gradeMax && !boardType && angle === undefined && !setterName && (!holds || holds.length === 0)) {
+    if (!gradeMin && !gradeMax && !boardType && angle === undefined && !setterName && (!holds || holds.length === 0) && (!feet || feet.length === 0)) {
       console.log("Validation Error: At least one search parameter must be provided.");
       return { error: "At least one search parameter must be provided." };
+    }
+    
+    // Validate that holds and feet are proper arrays
+    if (holds && !Array.isArray(holds)) {
+      console.log("ERROR: holds must be an array");
+      return { error: "holds must be an array" };
+    }
+    if (feet && !Array.isArray(feet)) {
+      console.log("ERROR: feet must be an array");
+      return { error: "feet must be an array" };
     }
 
     try {
@@ -294,11 +314,52 @@ export default class ProblemConcept {
 
       // Handle holds filtering (problems must contain all specified holds)
       if (holds && holds.length > 0) {
+        console.log(`  ✓ Adding holds filter: ${JSON.stringify(holds)}`);
         filter.holds = { $all: holds };
+      } else {
+        console.log(`  ✗ NOT adding holds filter (holds: ${holds}, length: ${holds?.length})`);
       }
 
+      // Handle feet filtering (problems must contain all specified foot holds)
+      if (feet && feet.length > 0) {
+        console.log(`  ✓ Adding feet filter: ${JSON.stringify(feet)}`);
+        filter.feet = { $all: feet };
+      } else {
+        console.log(`  ✗ NOT adding feet filter (feet: ${feet}, length: ${feet?.length})`);
+      }
+
+      console.log("\nFinal MongoDB filter:");
+      console.log(JSON.stringify(filter, null, 2));
+      
       const foundProblems = await this.problems.find(filter).toArray();
-      console.log(`Effect: Found ${foundProblems.length} problems matching search criteria`);
+      console.log(`\nQuery returned ${foundProblems.length} problems`);
+      
+      // Debug: Show what we got vs what we searched for
+      if (foundProblems.length > 0) {
+        console.log("\n--- First 3 Results ---");
+        foundProblems.slice(0, 3).forEach((p, i) => {
+          console.log(`\nResult ${i + 1}: ${p.name}`);
+          console.log(`  holds: [${p.holds.join(", ")}]`);
+          console.log(`  feet: [${p.feet.join(", ")}]`);
+          
+          // Check if it matches the feet filter
+          if (feet && feet.length > 0) {
+            const hasAllFeet = feet.every(f => p.feet.includes(f));
+            console.log(`  ✓ Contains all searched feet (${feet.join(", ")}): ${hasAllFeet}`);
+          }
+          
+          // Check if it matches the holds filter
+          if (holds && holds.length > 0) {
+            const hasAllHolds = holds.every(h => p.holds.includes(h));
+            console.log(`  ✓ Contains all searched holds (${holds.join(", ")}): ${hasAllHolds}`);
+          }
+        });
+      } else {
+        console.log("No results found");
+      }
+      
+      console.log("=== searchProblems DEBUG END ===\n");
+      
       return { problems: foundProblems };
     } catch (e) {
       console.error("Database error during searchProblems:", e);

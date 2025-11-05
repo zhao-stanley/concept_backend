@@ -1,45 +1,28 @@
 /**
- * The Requesting concept exposes passthrough routes by default,
- * which allow POSTs to the route:
- *
- * /{REQUESTING_BASE_URL}/{Concept name}/{action or query}
- *
- * to passthrough directly to the concept action or query.
- * This is a convenient and natural way to expose concepts to
- * the world, but should only be done intentionally for public
- * actions and queries.
- *
- * This file allows you to explicitly set inclusions and exclusions
- * for passthrough routes:
- * - inclusions: those that you can justify their inclusion
- * - exclusions: those to exclude, using Requesting routes instead
- */
-
-/**
- * INCLUSIONS
- *
- * Each inclusion must include a justification for why you think
- * the passthrough is appropriate (e.g. public query).
- *
- * inclusions = {"route": "justification"}
+ * Passthrough route configuration
+ * 
+ * Inclusions: routes that are directly accessible via POST requests
+ * Exclusions: routes that require syncs to handle
  */
 
 export const inclusions: Record<string, string> = {
-  // Feel free to delete these example inclusions
+  // Problem Concept - Public read operations
+  "/api/Problem/searchProblems": "Public query - allows users to search for climbing problems by various filters",
+  "/api/Problem/getProblemsByGrade": "Public query - allows users to browse problems by grade",
+  "/api/Problem/createProblem": "Public action - allows users to create new climbing problems",
   
+  // Video Concept - Public operations
+  "/api/Video/importVideo": "Public action - allows importing videos from external sources",
+  "/api/Video/getVideo": "Public action - retrieves a video by ID",
+  "/api/Video/removeVideo": "Public action - removes a video from the system",
+  "/api/Video/_getVideoDetails": "Public query - retrieves full video details including source and URL",
+  
+  // Tagging Concept - Public operations
+  "/api/Tagging/tag": "Public action - allows tagging items with descriptive labels",
+  "/api/Tagging/_getItemsByTag": "Public query - retrieves all items with a specific tag",
+  "/api/Tagging/_getTags": "Public query - retrieves all tags associated with an item",
+  "/api/Tagging/removeTag": "Public action - removes a specific tag from an item",
+  "/api/Tagging/removeAllTags": "Public action - removes all tags from an item",
 };
 
-/**
- * EXCLUSIONS
- *
- * Excluded routes fall back to the Requesting concept, and will
- * instead trigger the normal Requesting.request action. As this
- * is the intended behavior, no justification is necessary.
- *
- * exclusions = ["route"]
- */
-
-export const exclusions: Array<string> = [
-  // Feel free to delete these example exclusions
-  
-];
+export const exclusions: Array<string> = [];
